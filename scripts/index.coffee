@@ -1,13 +1,32 @@
 request = require('superagent')
 
-window.onerror = (e,url,l)->
-  data = 
-    msg: e
-    file: url
-    line: l
+class RemoteConsole
 
-  server = "http://requestb.in/xcglyexc"
-  
-  request.post server
-  .send JSON.stringify data
-  .end ()->
+  constructor : (srv)->
+    @server = srv
+
+    if @server?
+      window.onerror = @sendError
+
+  sendError : (e,url,l)->
+    data = 
+        error:
+          msg: e
+          file: url
+          line: l,
+        browser: 
+          appCodeName: navigator.appCodeName
+          appName: navigator.appName
+          appVersion: navigator.appVersion
+          platform: navigator.platform
+          userAgent: navigator.userAgent
+          vendor: navigator.vendor
+        window:
+          innerHeight: window.innerHeight
+          innerWidth: window.innerWidth
+
+    request.get @server
+    .query JSON.stringify data
+    .end ()->      
+
+module.exports = RemoteConsole
