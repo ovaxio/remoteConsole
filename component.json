@@ -1,0 +1,16 @@
+{
+  "name": "mobileconsole",
+  "repo": "ovaxio/mobile-console",
+  "description": "Remote debugging console",
+  "version": "0.1.0",
+  "keywords": [],
+  "dependencies": {
+    "visionmedia/superagent": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}
