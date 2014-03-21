@@ -1,3 +1,3 @@
-# Mobile Console
+# Remote Console
 
   Remote console for debugging JS on mobile browser

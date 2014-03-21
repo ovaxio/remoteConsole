@@ -1473,12 +1473,13 @@ require.register("mobileconsole/index.js", function(exports, require, module){
       }
       _req.send(this._options.data);
       _req.end((function(_this) {
-        return function(response) {
+        return function(err, res) {
           if (_this._options.callback != null) {
-            _this._options.callback(response);
+            _this._options.callback(err, res);
           }
         };
       })(this));
+      return true;
     };
 
     RemoteConsole.prototype.getWindowData = function() {
@@ -1490,12 +1491,12 @@ require.register("mobileconsole/index.js", function(exports, require, module){
 
     RemoteConsole.prototype.getNavigatorData = function() {
       return {
-        appCodeName: navigator.appCodeName,
-        appName: navigator.appName,
-        appVersion: navigator.appVersion,
-        platform: navigator.platform,
-        userAgent: navigator.userAgent,
-        vendor: navigator.vendor
+        appCodeName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appCodeName : void 0) != null,
+        appName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appName : void 0) != null,
+        appVersion: (typeof navigator !== "undefined" && navigator !== null ? navigator.appVersion : void 0) != null,
+        platform: (typeof navigator !== "undefined" && navigator !== null ? navigator.platform : void 0) != null,
+        userAgent: (typeof navigator !== "undefined" && navigator !== null ? navigator.userAgent : void 0) != null,
+        vendor: (typeof navigator !== "undefined" && navigator !== null ? navigator.vendor : void 0) != null
       };
     };
 

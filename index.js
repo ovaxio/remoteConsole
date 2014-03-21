@@ -60,6 +60,7 @@
           }
         };
       })(this));
+      return true;
     };
 
     RemoteConsole.prototype.getWindowData = function() {
@@ -71,12 +72,12 @@
 
     RemoteConsole.prototype.getNavigatorData = function() {
       return {
-        appCodeName: navigator.appCodeName,
-        appName: navigator.appName,
-        appVersion: navigator.appVersion,
-        platform: navigator.platform,
-        userAgent: navigator.userAgent,
-        vendor: navigator.vendor
+        appCodeName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appCodeName : void 0) != null,
+        appName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appName : void 0) != null,
+        appVersion: (typeof navigator !== "undefined" && navigator !== null ? navigator.appVersion : void 0) != null,
+        platform: (typeof navigator !== "undefined" && navigator !== null ? navigator.platform : void 0) != null,
+        userAgent: (typeof navigator !== "undefined" && navigator !== null ? navigator.userAgent : void 0) != null,
+        vendor: (typeof navigator !== "undefined" && navigator !== null ? navigator.vendor : void 0) != null
       };
     };
 

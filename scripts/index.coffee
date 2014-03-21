@@ -47,18 +47,18 @@ class RemoteConsole
       if @_options.callback?
         @_options.callback(err,res)
         return
-    return
+    return true
 
   getWindowData : ()->
     innerHeight: window.innerHeight
     innerWidth: window.innerWidth
 
   getNavigatorData : ()->
-    appCodeName: navigator.appCodeName
-    appName: navigator.appName
-    appVersion: navigator.appVersion
-    platform: navigator.platform
-    userAgent: navigator.userAgent
-    vendor: navigator.vendor
+    appCodeName: navigator?.appCodeName?
+    appName: navigator?.appName?
+    appVersion: navigator?.appVersion?
+    platform: navigator?.platform?
+    userAgent: navigator?.userAgent?
+    vendor: navigator?.vendor?
 
 module.exports = RemoteConsole
