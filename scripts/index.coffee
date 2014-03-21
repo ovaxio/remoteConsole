@@ -9,6 +9,7 @@ class RemoteConsole
       server: null
       method: 'get'
       callback: null
+      toScreen: true
       data: 
         error : null
         browser: @getNavigatorData()
@@ -27,7 +28,29 @@ class RemoteConsole
       file: url
       line: l
 
-    # Method choice
+    # Sending method choice
+    # switch @_options.method
+    #   when "ws","websocket"
+    #     if typeof WebSocket is "function" or typeof window.WebSocket is "function"
+    #       @sendByWebSocket()
+    #     else
+    #       @sendByAjax()
+    #   else
+    #     @sendByAjax()
+    @sendByAjax()
+    @sendToScreen() if @_options.toScreen is on
+
+    return true
+
+  # sendByWebSocket : ()=>
+  #   ws = new WebSocket @_options.server
+  #   ws.onopen = ()->
+  #     ws.send(@_options.data)
+  #   ws.onmessage = (e)->
+  #     # console.log e.data
+  #   ws.onclose = ()->
+
+  sendByAjax : ()->
     _req = switch @_options.method
       when "post"
         request.post @_options.server
@@ -43,11 +66,21 @@ class RemoteConsole
     _req.send @_options.data
 
     # callback
-    _req.end (err,res)=>   
+    _req.end (err,res)=>
       if @_options.callback?
         @_options.callback(err,res)
         return
-    return true
+
+  sendToScreen : ()->
+    body = document.getElementsByTagName('body')[0]
+    rcons = document.createElement 'div'
+    pre = document.createElement 'pre'
+
+    rcons.className = 'rcons-wrap'
+
+    pre.innerText = JSON.stringify @_options.data, undefined, 2
+    rcons.appendChild pre
+    body.appendChild rcons
 
   getWindowData : ()->
     innerHeight: window.innerHeight

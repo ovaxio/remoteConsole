@@ -15,6 +15,7 @@
         server: null,
         method: 'get',
         callback: null,
+        toScreen: true,
         data: {
           error: null,
           browser: this.getNavigatorData(),
@@ -31,12 +32,20 @@
     }
 
     RemoteConsole.prototype.sendError = function(e, url, l) {
-      var value, variable, _ref, _req;
       this._options.data.error = {
         msg: e,
         file: url,
         line: l
       };
+      this.sendByAjax();
+      if (this._options.toScreen === true) {
+        this.sendToScreen();
+      }
+      return true;
+    };
+
+    RemoteConsole.prototype.sendByAjax = function() {
+      var value, variable, _ref, _req;
       _req = (function() {
         switch (this._options.method) {
           case "post":
@@ -53,14 +62,24 @@
         }
       }
       _req.send(this._options.data);
-      _req.end((function(_this) {
+      return _req.end((function(_this) {
         return function(err, res) {
           if (_this._options.callback != null) {
             _this._options.callback(err, res);
           }
         };
       })(this));
-      return true;
+    };
+
+    RemoteConsole.prototype.sendToScreen = function() {
+      var body, pre, rcons;
+      body = document.getElementsByTagName('body')[0];
+      rcons = document.createElement('div');
+      pre = document.createElement('pre');
+      rcons.className = 'rcons-wrap';
+      pre.innerText = JSON.stringify(this._options.data, void 0, 2);
+      rcons.appendChild(pre);
+      return body.appendChild(rcons);
     };
 
     RemoteConsole.prototype.getWindowData = function() {
