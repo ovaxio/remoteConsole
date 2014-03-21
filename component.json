@@ -1,6 +1,6 @@
 {
-  "name": "mobileconsole",
-  "repo": "ovaxio/mobile-console",
+  "name": "remoteConsole",
+  "repo": "ovaxio/remoteConsole",
   "description": "Remote debugging console",
   "version": "0.1.0",
   "keywords": [],
