@@ -2,31 +2,36 @@ request = require('superagent')
 
 class RemoteConsole
 
-  constructor : (srv)->
-    @server = srv
-
-    if @server?
-      window.onerror = @sendError
-
-  sendError : (e,url,l)->
+  constructor : (@server)->
+    window.onerror = @sendError if @server?
+      
+  sendError : (e,url,l)=>
+    # console.log @server
     data = 
         error:
           msg: e
           file: url
           line: l,
         browser: 
-          appCodeName: navigator.appCodeName
-          appName: navigator.appName
-          appVersion: navigator.appVersion
-          platform: navigator.platform
-          userAgent: navigator.userAgent
-          vendor: navigator.vendor
+          @getNavigatorData()
         window:
-          innerHeight: window.innerHeight
-          innerWidth: window.innerWidth
+          @getWindowData()
 
     request.get @server
     .query JSON.stringify data
     .end ()->      
+    # console.log data
+
+  getWindowData : ()->
+    innerHeight: window.innerHeight
+    innerWidth: window.innerWidth
+
+  getNavigatorData : ()->
+    appCodeName: navigator.appCodeName
+    appName: navigator.appName
+    appVersion: navigator.appVersion
+    platform: navigator.platform
+    userAgent: navigator.userAgent
+    vendor: navigator.vendor
 
 module.exports = RemoteConsole
