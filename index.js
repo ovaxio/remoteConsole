@@ -14,6 +14,7 @@
       this._default = {
         server: null,
         method: 'get',
+        callback: null,
         data: {
           error: null,
           browser: this.getNavigatorData(),
@@ -51,9 +52,14 @@
           _req.set(variable, value);
         }
       }
-      console.log(_req);
       _req.send(this._options.data);
-      return _req.end(function() {});
+      _req.end((function(_this) {
+        return function(err, res) {
+          if (_this._options.callback != null) {
+            _this._options.callback(err, res);
+          }
+        };
+      })(this));
     };
 
     RemoteConsole.prototype.getWindowData = function() {

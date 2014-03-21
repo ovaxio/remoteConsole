@@ -8,12 +8,13 @@ class RemoteConsole
     @_default = 
       server: null
       method: 'get'
+      callback: null
       data: 
         error : null
         browser: @getNavigatorData()
         window: @getWindowData()
 
-    # if @_options instanceof Object and @_options?
+   # if @_options instanceof Object and @_options?
     @_options = extend {},@_default,@_options
 
     window.onerror = @sendError if @_options.server?
@@ -36,13 +37,17 @@ class RemoteConsole
     # Set headers
     if @_options.headers?
       for variable,value of @_options.headers
-        # alert variable
         _req.set variable,value
 
-    console.log _req
     # Send the request with the data
     _req.send @_options.data
-    _req.end ()->   
+
+    # callback
+    _req.end (err,res)=>   
+      if @_options.callback?
+        @_options.callback(err,res)
+        return
+    return
 
   getWindowData : ()->
     innerHeight: window.innerHeight
