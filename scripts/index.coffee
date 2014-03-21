@@ -1,26 +1,48 @@
 request = require('superagent')
+extend = require('extend')
 
 class RemoteConsole
 
-  constructor : (@server)->
-    window.onerror = @sendError if @server?
-      
-  sendError : (e,url,l)=>
-    # console.log @server
-    data = 
-        error:
-          msg: e
-          file: url
-          line: l,
-        browser: 
-          @getNavigatorData()
-        window:
-          @getWindowData()
+  constructor : (@_options)->
 
-    request.get @server
-    .query JSON.stringify data
-    .end ()->      
-    # console.log data
+    @_default = 
+      server: null
+      method: 'get'
+      data: 
+        error : null
+        browser: @getNavigatorData()
+        window: @getWindowData()
+
+    # if @_options instanceof Object and @_options?
+    @_options = extend {},@_default,@_options
+
+    window.onerror = @sendError if @_options.server?
+    @_options.method = @_options.method.toLowerCase() if typeof @_options.method is "string"
+    
+  sendError : (e,url,l)=>
+    
+    @_options.data.error = 
+      msg: e
+      file: url
+      line: l
+
+    # Method choice
+    _req = switch @_options.method
+      when "post"
+        request.post @_options.server
+      else
+        request.get @_options.server
+
+    # Set headers
+    if @_options.headers?
+      for variable,value of @_options.headers
+        # alert variable
+        _req.set variable,value
+
+    console.log _req
+    # Send the request with the data
+    _req.send @_options.data
+    _req.end ()->   
 
   getWindowData : ()->
     innerHeight: window.innerHeight

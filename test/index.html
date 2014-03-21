@@ -3,12 +3,21 @@
   <head>
     <script type="text/javascript" src="build.js"></script>
     <script type="text/javascript">
-      var remoteConsole, server;
+      var remoteConsole, options;
 
       RemoteConsole = require('mobileconsole');
-      server = "http://requestb.in/xcglyexc";
 
-      remoteConsole = new RemoteConsole(server);
+      options = {
+        // server : "http://requestb.in/xcglyexc",
+        server : "http://localhost:8000",
+        method : "post",
+        headers : {
+          'Content-Type': 'application/json',
+          'Content-Language': 'fr'
+        }
+      };
+
+      remoteConsole = new RemoteConsole(options);
 
       throw new Error("ops!! You made a mistake");
     </script>
