@@ -124,12 +124,10 @@
     };
 
     RemoteConsole.prototype.getWindowData = function() {
-      if (typeof window !== "undefined" && window !== null) {
-        return {
-          innerHeight: window.innerHeight,
-          innerWidth: window.innerWidth
-        };
-      }
+      return {
+        innerHeight: (typeof window !== "undefined" && window !== null ? window.innerHeight : void 0) || document.documentElement.clientHeight,
+        innerWidth: (typeof window !== "undefined" && window !== null ? window.innerWidth : void 0) || document.documentElement.clientWidth
+      };
     };
 
     RemoteConsole.prototype.getNavigatorData = function() {

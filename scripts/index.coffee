@@ -131,9 +131,8 @@ class RemoteConsole
     return
 
   getWindowData : ()->
-    if window?
-      innerHeight: window.innerHeight
-      innerWidth: window.innerWidth
+    innerHeight: window?.innerHeight || document.documentElement.clientHeight
+    innerWidth: window?.innerWidth || document.documentElement.clientWidth
 
   getNavigatorData : ()->
     if navigator?
