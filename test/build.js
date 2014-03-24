@@ -1801,6 +1801,7 @@ require.register("remoteConsole/index.js", function(exports, require, module){
           window: this.getWindowData()
         }
       };
+      this._options.data = extend({}, this._default.data, this._options.data);
       this._options = extend({}, this._default, this._options);
       if (this._options.server != null) {
         window.onerror = this.sendError;

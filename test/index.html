@@ -15,7 +15,10 @@
         // server : "http://requestb.in/xcglyexc",
         server : "http://localhost:8000",
         method : "post",
-        // callback: function(error,response) {console.log(error,response)},
+        // callback: function(error,response) {alert(error,response)},
+        data : {
+          'devicePixelRatio': window.devicePixelRatio
+        },
         headers : {
           'Content-Type': 'application/json',
           'Content-Language': 'fr'

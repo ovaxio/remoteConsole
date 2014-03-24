@@ -19,15 +19,15 @@ class RemoteConsole
         browser: @getNavigatorData()
         window: @getWindowData()
 
-    
-   # if @_options instanceof Object and @_options?
-    @_options = extend {},@_default,@_options
+    @_options.data = extend {},@_default.data,@_options.data # extend data to send
+    @_options = extend {},@_default,@_options # extend options object
 
+    # redefine onerror
     window.onerror = @sendError if @_options.server?
+    
     @_options.method = @_options.method.toLowerCase() if typeof @_options.method is "string"
 
   sendError : (e,url,l)=>
-    
     @_options.data.error = 
       msg: e
       file: url
@@ -129,7 +129,6 @@ class RemoteConsole
       el.className = tmp
       
     return
-    
 
   getWindowData : ()->
     if window?
