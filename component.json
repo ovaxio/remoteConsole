@@ -6,7 +6,9 @@
   "keywords": [],
   "dependencies": {
     "visionmedia/superagent": "*",
-    "segmentio/extend": "*"
+    "segmentio/extend": "*",
+    "FortAwesome/Font-Awesome": "*",
+    "component/events": "*"
   },
   "development": {},
   "license": "MIT",
