@@ -1416,7 +1416,6 @@ module.exports = function extend (object) {
     return object;
 };
 });
-
 require.register("component-event/index.js", function(exports, require, module){
 var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
     unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
@@ -1788,8 +1787,8 @@ require.register("remoteConsole/index.js", function(exports, require, module){
       this._options = _options;
       this.sendError = __bind(this.sendError, this);
       this._icons = {
-        close: '<i class="fa fa-chevron-down"></i>',
-        open: '<i class="fa fa-chevron-up"></i>'
+        close: '&#9660;',
+        open: '&#9650;'
       };
       this._default = {
         server: null,
@@ -1937,8 +1936,6 @@ require.register("remoteConsole/index.js", function(exports, require, module){
 
 
 
-
-
 require.alias("visionmedia-superagent/lib/client.js", "remoteConsole/deps/superagent/lib/client.js");
 require.alias("visionmedia-superagent/lib/client.js", "remoteConsole/deps/superagent/index.js");
 require.alias("visionmedia-superagent/lib/client.js", "superagent/index.js");
@@ -1949,7 +1946,6 @@ require.alias("component-reduce/index.js", "visionmedia-superagent/deps/reduce/i
 require.alias("visionmedia-superagent/lib/client.js", "visionmedia-superagent/index.js");
 require.alias("segmentio-extend/index.js", "remoteConsole/deps/extend/index.js");
 require.alias("segmentio-extend/index.js", "extend/index.js");
-
 
 require.alias("component-events/index.js", "remoteConsole/deps/events/index.js");
 require.alias("component-events/index.js", "events/index.js");

@@ -7,7 +7,6 @@
   "dependencies": {
     "visionmedia/superagent": "*",
     "segmentio/extend": "*",
-    "FortAwesome/Font-Awesome": "*",
     "component/events": "*"
   },
   "development": {},

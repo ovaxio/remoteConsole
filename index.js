@@ -14,8 +14,8 @@
       this._options = _options;
       this.sendError = __bind(this.sendError, this);
       this._icons = {
-        close: '<i class="fa fa-chevron-down"></i>',
-        open: '<i class="fa fa-chevron-up"></i>'
+        close: '&#9660;',
+        open: '&#9650;'
       };
       this._default = {
         server: null,

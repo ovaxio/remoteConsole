@@ -6,8 +6,8 @@ class RemoteConsole
 
   constructor : (@_options)->
     @_icons =
-      close: '<i class="fa fa-chevron-down"></i>'
-      open: '<i class="fa fa-chevron-up"></i>'
+      close: '&#9660;'
+      open: '&#9650;'
 
     @_default = 
       server: null
