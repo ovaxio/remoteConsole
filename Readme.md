@@ -8,7 +8,7 @@
 
 ## Example
 
-	```js
+```js
 var remoteConsole, options;
 
 RemoteConsole = require('remoteConsole');
