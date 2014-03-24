@@ -13,6 +13,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": [
+    "libs/json3.js",
     "index.js"
   ],
   "styles": [
