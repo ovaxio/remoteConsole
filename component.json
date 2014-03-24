@@ -6,7 +6,8 @@
   "keywords": [],
   "dependencies": {
     "visionmedia/superagent": "*",
-    "segmentio/extend": "*"
+    "segmentio/extend": "*",
+    "component/events": "*"
   },
   "development": {},
   "license": "MIT",

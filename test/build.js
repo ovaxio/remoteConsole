@@ -1416,20 +1416,380 @@ module.exports = function extend (object) {
     return object;
 };
 });
+require.register("component-event/index.js", function(exports, require, module){
+var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
+    unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
+    prefix = bind !== 'addEventListener' ? 'on' : '';
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  el[bind](prefix + type, fn, capture || false);
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  el[unbind](prefix + type, fn, capture || false);
+  return fn;
+};
+});
+require.register("component-query/index.js", function(exports, require, module){
+function one(selector, el) {
+  return el.querySelector(selector);
+}
+
+exports = module.exports = function(selector, el){
+  el = el || document;
+  return one(selector, el);
+};
+
+exports.all = function(selector, el){
+  el = el || document;
+  return el.querySelectorAll(selector);
+};
+
+exports.engine = function(obj){
+  if (!obj.one) throw new Error('.one callback required');
+  if (!obj.all) throw new Error('.all callback required');
+  one = obj.one;
+  exports.all = obj.all;
+  return exports;
+};
+
+});
+require.register("component-matches-selector/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var query = require('query');
+
+/**
+ * Element prototype.
+ */
+
+var proto = Element.prototype;
+
+/**
+ * Vendor function.
+ */
+
+var vendor = proto.matches
+  || proto.webkitMatchesSelector
+  || proto.mozMatchesSelector
+  || proto.msMatchesSelector
+  || proto.oMatchesSelector;
+
+/**
+ * Expose `match()`.
+ */
+
+module.exports = match;
+
+/**
+ * Match `el` to `selector`.
+ *
+ * @param {Element} el
+ * @param {String} selector
+ * @return {Boolean}
+ * @api public
+ */
+
+function match(el, selector) {
+  if (vendor) return vendor.call(el, selector);
+  var nodes = query.all(selector, el.parentNode);
+  for (var i = 0; i < nodes.length; ++i) {
+    if (nodes[i] == el) return true;
+  }
+  return false;
+}
+
+});
+require.register("discore-closest/index.js", function(exports, require, module){
+var matches = require('matches-selector')
+
+module.exports = function (element, selector, checkYoSelf, root) {
+  element = checkYoSelf ? {parentNode: element} : element
+
+  root = root || document
+
+  // Make sure `element !== document` and `element != null`
+  // otherwise we get an illegal invocation
+  while ((element = element.parentNode) && element !== document) {
+    if (matches(element, selector))
+      return element
+    // After `matches` on the edge case that
+    // the selector matches the root
+    // (when the root is not the document)
+    if (element === root)
+      return  
+  }
+}
+});
+require.register("component-delegate/index.js", function(exports, require, module){
+/**
+ * Module dependencies.
+ */
+
+var closest = require('closest')
+  , event = require('event');
+
+/**
+ * Delegate event `type` to `selector`
+ * and invoke `fn(e)`. A callback function
+ * is returned which may be passed to `.unbind()`.
+ *
+ * @param {Element} el
+ * @param {String} selector
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, selector, type, fn, capture){
+  return event.bind(el, type, function(e){
+    var target = e.target || e.srcElement;
+    e.delegateTarget = closest(target, selector, true, el);
+    if (e.delegateTarget) fn.call(el, e);
+  }, capture);
+};
+
+/**
+ * Unbind event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  event.unbind(el, type, fn, capture);
+};
+
+});
+require.register("component-events/index.js", function(exports, require, module){
+
+/**
+ * Module dependencies.
+ */
+
+var events = require('event');
+var delegate = require('delegate');
+
+/**
+ * Expose `Events`.
+ */
+
+module.exports = Events;
+
+/**
+ * Initialize an `Events` with the given
+ * `el` object which events will be bound to,
+ * and the `obj` which will receive method calls.
+ *
+ * @param {Object} el
+ * @param {Object} obj
+ * @api public
+ */
+
+function Events(el, obj) {
+  if (!(this instanceof Events)) return new Events(el, obj);
+  if (!el) throw new Error('element required');
+  if (!obj) throw new Error('object required');
+  this.el = el;
+  this.obj = obj;
+  this._events = {};
+}
+
+/**
+ * Subscription helper.
+ */
+
+Events.prototype.sub = function(event, method, cb){
+  this._events[event] = this._events[event] || {};
+  this._events[event][method] = cb;
+};
+
+/**
+ * Bind to `event` with optional `method` name.
+ * When `method` is undefined it becomes `event`
+ * with the "on" prefix.
+ *
+ * Examples:
+ *
+ *  Direct event handling:
+ *
+ *    events.bind('click') // implies "onclick"
+ *    events.bind('click', 'remove')
+ *    events.bind('click', 'sort', 'asc')
+ *
+ *  Delegated event handling:
+ *
+ *    events.bind('click li > a')
+ *    events.bind('click li > a', 'remove')
+ *    events.bind('click a.sort-ascending', 'sort', 'asc')
+ *    events.bind('click a.sort-descending', 'sort', 'desc')
+ *
+ * @param {String} event
+ * @param {String|function} [method]
+ * @return {Function} callback
+ * @api public
+ */
+
+Events.prototype.bind = function(event, method){
+  var e = parse(event);
+  var el = this.el;
+  var obj = this.obj;
+  var name = e.name;
+  var method = method || 'on' + name;
+  var args = [].slice.call(arguments, 2);
+
+  // callback
+  function cb(){
+    var a = [].slice.call(arguments).concat(args);
+    obj[method].apply(obj, a);
+  }
+
+  // bind
+  if (e.selector) {
+    cb = delegate.bind(el, e.selector, name, cb);
+  } else {
+    events.bind(el, name, cb);
+  }
+
+  // subscription for unbinding
+  this.sub(name, method, cb);
+
+  return cb;
+};
+
+/**
+ * Unbind a single binding, all bindings for `event`,
+ * or all bindings within the manager.
+ *
+ * Examples:
+ *
+ *  Unbind direct handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * Unbind delegate handlers:
+ *
+ *     events.unbind('click', 'remove')
+ *     events.unbind('click')
+ *     events.unbind()
+ *
+ * @param {String|Function} [event]
+ * @param {String|Function} [method]
+ * @api public
+ */
+
+Events.prototype.unbind = function(event, method){
+  if (0 == arguments.length) return this.unbindAll();
+  if (1 == arguments.length) return this.unbindAllOf(event);
+
+  // no bindings for this event
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  // no bindings for this method
+  var cb = bindings[method];
+  if (!cb) return;
+
+  events.unbind(this.el, event, cb);
+};
+
+/**
+ * Unbind all events.
+ *
+ * @api private
+ */
+
+Events.prototype.unbindAll = function(){
+  for (var event in this._events) {
+    this.unbindAllOf(event);
+  }
+};
+
+/**
+ * Unbind all events for `event`.
+ *
+ * @param {String} event
+ * @api private
+ */
+
+Events.prototype.unbindAllOf = function(event){
+  var bindings = this._events[event];
+  if (!bindings) return;
+
+  for (var method in bindings) {
+    this.unbind(event, method);
+  }
+};
+
+/**
+ * Parse `event`.
+ *
+ * @param {String} event
+ * @return {Object}
+ * @api private
+ */
+
+function parse(event) {
+  var parts = event.split(/ +/);
+  return {
+    name: parts.shift(),
+    selector: parts.join(' ')
+  }
+}
+
+});
 require.register("remoteConsole/index.js", function(exports, require, module){
 // Generated by CoffeeScript 1.7.1
 (function() {
-  var RemoteConsole, extend, request,
+  var RemoteConsole, events, extend, request,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   request = require('superagent');
 
   extend = require('extend');
 
+  events = require('events');
+
   RemoteConsole = (function() {
     function RemoteConsole(_options) {
       this._options = _options;
       this.sendError = __bind(this.sendError, this);
+      this._icons = {
+        close: '&#9660;',
+        open: '&#9650;'
+      };
       this._default = {
         server: null,
         method: 'get',
@@ -1456,7 +1816,9 @@ require.register("remoteConsole/index.js", function(exports, require, module){
         file: url,
         line: l
       };
-      this.sendByAjax();
+      if ((this._options.method != null) && (this._options.server != null)) {
+        this.sendByAjax();
+      }
       if (this._options.toScreen === true) {
         this.sendToScreen();
       }
@@ -1491,32 +1853,68 @@ require.register("remoteConsole/index.js", function(exports, require, module){
     };
 
     RemoteConsole.prototype.sendToScreen = function() {
-      var body, pre, rcons;
+      var body, classPrefix, close, el, pre, rcons, title;
+      classPrefix = 'rcons-';
       body = document.getElementsByTagName('body')[0];
       rcons = document.createElement('div');
+      title = document.createElement('div');
+      close = document.createElement('span');
       pre = document.createElement('pre');
-      rcons.className = 'rcons-wrap';
+      close.id = 'rcons-close';
+      close.className = classPrefix + 'close';
+      rcons.id = 'rconsole';
+      rcons.className = classPrefix + 'wrap';
+      title.className = classPrefix + 'title';
+      close.innerHTML = this._icons.close;
+      title.innerText = "Remote Console";
       pre.innerText = JSON.stringify(this._options.data, void 0, 2);
+      title.appendChild(close);
+      rcons.appendChild(title);
       rcons.appendChild(pre);
-      return body.appendChild(rcons);
+      body.appendChild(rcons);
+      el = document.getElementById('rconsole');
+      this.events = events(el, this);
+      return this.events.bind('click .rcons-title', 'toggle', el);
+    };
+
+    RemoteConsole.prototype.toggle = function() {
+      var closeBtn, el, idx, tmp;
+      el = [].slice.call(arguments, 1).shift();
+      if (el.className != null) {
+        closeBtn = document.getElementById('rcons-close');
+        if (el.className.indexOf("rcons-hidden") !== -1) {
+          tmp = el.className.split(" ");
+          idx = tmp.indexOf("rcons-hidden");
+          tmp.splice(idx, 1).join(" ");
+          closeBtn.innerHTML = this._icons.close;
+        } else {
+          tmp = el.className.concat(" rcons-hidden");
+          closeBtn.innerHTML = this._icons.open;
+        }
+        el.className = tmp;
+      }
     };
 
     RemoteConsole.prototype.getWindowData = function() {
-      return {
-        innerHeight: window.innerHeight,
-        innerWidth: window.innerWidth
-      };
+      if (typeof window !== "undefined" && window !== null) {
+        return {
+          innerHeight: window.innerHeight,
+          innerWidth: window.innerWidth
+        };
+      }
     };
 
     RemoteConsole.prototype.getNavigatorData = function() {
-      return {
-        appCodeName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appCodeName : void 0) != null,
-        appName: (typeof navigator !== "undefined" && navigator !== null ? navigator.appName : void 0) != null,
-        appVersion: (typeof navigator !== "undefined" && navigator !== null ? navigator.appVersion : void 0) != null,
-        platform: (typeof navigator !== "undefined" && navigator !== null ? navigator.platform : void 0) != null,
-        userAgent: (typeof navigator !== "undefined" && navigator !== null ? navigator.userAgent : void 0) != null,
-        vendor: (typeof navigator !== "undefined" && navigator !== null ? navigator.vendor : void 0) != null
-      };
+      if (typeof navigator !== "undefined" && navigator !== null) {
+        return {
+          appCodeName: navigator.appCodeName != null ? navigator.appCodeName : void 0,
+          appName: navigator.appName != null ? navigator.appName : void 0,
+          appVersion: navigator.appVersion != null ? navigator.appVersion : void 0,
+          platform: navigator.platform != null ? navigator.platform : void 0,
+          userAgent: navigator.userAgent != null ? navigator.userAgent : void 0,
+          vendor: navigator.vendor != null ? navigator.vendor : void 0
+        };
+      }
     };
 
     return RemoteConsole;
@@ -1534,6 +1932,10 @@ require.register("remoteConsole/index.js", function(exports, require, module){
 
 
 
+
+
+
+
 require.alias("visionmedia-superagent/lib/client.js", "remoteConsole/deps/superagent/lib/client.js");
 require.alias("visionmedia-superagent/lib/client.js", "remoteConsole/deps/superagent/index.js");
 require.alias("visionmedia-superagent/lib/client.js", "superagent/index.js");
@@ -1544,5 +1946,18 @@ require.alias("component-reduce/index.js", "visionmedia-superagent/deps/reduce/i
 require.alias("visionmedia-superagent/lib/client.js", "visionmedia-superagent/index.js");
 require.alias("segmentio-extend/index.js", "remoteConsole/deps/extend/index.js");
 require.alias("segmentio-extend/index.js", "extend/index.js");
+
+require.alias("component-events/index.js", "remoteConsole/deps/events/index.js");
+require.alias("component-events/index.js", "events/index.js");
+require.alias("component-event/index.js", "component-events/deps/event/index.js");
+
+require.alias("component-delegate/index.js", "component-events/deps/delegate/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("discore-closest/index.js", "component-delegate/deps/closest/index.js");
+require.alias("component-matches-selector/index.js", "discore-closest/deps/matches-selector/index.js");
+require.alias("component-query/index.js", "component-matches-selector/deps/query/index.js");
+
+require.alias("discore-closest/index.js", "discore-closest/index.js");
+require.alias("component-event/index.js", "component-delegate/deps/event/index.js");
 
 require.alias("remoteConsole/index.js", "remoteConsole/index.js");

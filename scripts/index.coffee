@@ -1,9 +1,13 @@
 request = require('superagent')
 extend = require('extend')
+events = require('events')
 
 class RemoteConsole
 
   constructor : (@_options)->
+    @_icons =
+      close: '&#9660;'
+      open: '&#9650;'
 
     @_default = 
       server: null
@@ -15,12 +19,13 @@ class RemoteConsole
         browser: @getNavigatorData()
         window: @getWindowData()
 
+    
    # if @_options instanceof Object and @_options?
     @_options = extend {},@_default,@_options
 
     window.onerror = @sendError if @_options.server?
     @_options.method = @_options.method.toLowerCase() if typeof @_options.method is "string"
-    
+
   sendError : (e,url,l)=>
     
     @_options.data.error = 
@@ -37,7 +42,8 @@ class RemoteConsole
     #       @sendByAjax()
     #   else
     #     @sendByAjax()
-    @sendByAjax()
+    # @sendByAjax()
+    @sendByAjax() if @_options.method? and @_options.server?
     @sendToScreen() if @_options.toScreen is on
 
     return true
@@ -72,26 +78,74 @@ class RemoteConsole
         return
 
   sendToScreen : ()->
+    classPrefix = 'rcons-'
     body = document.getElementsByTagName('body')[0]
     rcons = document.createElement 'div'
+    title = document.createElement 'div'
+    close = document.createElement 'span'
     pre = document.createElement 'pre'
 
-    rcons.className = 'rcons-wrap'
+    close.id = 'rcons-close'
+    close.className = classPrefix+'close'
 
+    rcons.id = 'rconsole'
+    rcons.className = classPrefix+'wrap'
+
+    title.className = classPrefix+'title'
+
+    close.innerHTML = @_icons.close
+    title.innerText = "Remote Console"
     pre.innerText = JSON.stringify @_options.data, undefined, 2
+
+    # append to DOM
+    title.appendChild close
+    rcons.appendChild title
     rcons.appendChild pre
     body.appendChild rcons
 
+    # events
+    el = document.getElementById 'rconsole'
+    @events = events(el, this);
+    @events.bind('click .rcons-title', 'toggle', el);
+
+  toggle : ()->
+    el = [].slice.call(arguments, 1).shift()
+    
+    # toggle display (add css class)
+    if el.className?
+      closeBtn = document.getElementById 'rcons-close'
+
+      if el.className.indexOf("rcons-hidden") != -1
+        tmp = el.className.split " "
+        idx = tmp.indexOf "rcons-hidden"
+        tmp.splice idx, 1
+        .join " "
+
+        closeBtn.innerHTML = @_icons.close
+      else
+        tmp = el.className.concat " rcons-hidden"
+        closeBtn.innerHTML = @_icons.open
+
+      el.className = tmp
+      
+    return
+    
+
   getWindowData : ()->
-    innerHeight: window.innerHeight
-    innerWidth: window.innerWidth
+    if window?
+      innerHeight: window.innerHeight
+      innerWidth: window.innerWidth
 
   getNavigatorData : ()->
-    appCodeName: navigator?.appCodeName?
-    appName: navigator?.appName?
-    appVersion: navigator?.appVersion?
-    platform: navigator?.platform?
-    userAgent: navigator?.userAgent?
-    vendor: navigator?.vendor?
+    if navigator?
+      {
+        appCodeName: navigator.appCodeName if navigator.appCodeName?
+        appName: navigator.appName if navigator.appName?
+        appVersion: navigator.appVersion if navigator.appVersion?
+        platform: navigator.platform if navigator.platform?
+        userAgent: navigator.userAgent if navigator.userAgent?
+        vendor: navigator.vendor if navigator.vendor?
+      }
+
 
 module.exports = RemoteConsole
